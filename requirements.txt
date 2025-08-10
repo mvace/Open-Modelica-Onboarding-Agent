@@ -1,0 +1,8 @@
+langchain>=0.2
+langchain-community>=0.2
+langchain-openai>=0.1
+faiss-cpu>=1.8
+pydantic>=2.7
+pydantic-settings>=2.3
+pymupdf
+streamlit>=1.36
