@@ -1,7 +1,8 @@
 import streamlit as st
 from settings import settings
-from tools.doc_search_tool import _search_docs
+from tools.doc_search_tool import DocSearchTool
 from chains.answer_chain import answer_with_citations
+import json
 
 st.set_page_config(page_title="OpenModelica Onboarding Assistant", layout="wide")
 st.title("OpenModelica Onboarding Assistant")
@@ -28,7 +29,8 @@ if q:
     # Generate answer
     with st.chat_message("assistant"):
         with st.spinner("Searching documentation and generating answer..."):
-            passages = _search_docs(q, k=5)
+            result_str = DocSearchTool.run(q)  # LangChain Tool API
+            passages = json.loads(result_str)
             answer = answer_with_citations(q, passages)
             st.markdown(answer)
         st.session_state.messages.append(("assistant", answer))
