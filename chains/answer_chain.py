@@ -31,21 +31,6 @@ PROMPT = ChatPromptTemplate.from_messages(
 )
 
 
-def document_to_passage(d) -> Dict:
-    """Convert a LangChain Document to a serializable passage dict."""
-    m = d.metadata or {}
-    return {
-        "content": d.page_content,
-        "page_label_start": m.get("page_label_start"),
-        "page_label_end": m.get("page_label_end"),
-        "pdf_page_start": m.get("pdf_page_start"),
-        "pdf_page_end": m.get("pdf_page_end"),
-        "section_number": m.get("section_number"),
-        "section_title": m.get("section_title"),
-        "source": m.get("source"),
-    }
-
-
 def _pdf_link(text: str, idx: int) -> str:
     url = getattr(settings, "pdf_url", None)
     return f"[{text}]({url}#page={idx})" if url else text
@@ -75,8 +60,9 @@ def _extract_range(p: Dict) -> Tuple[int | None, int | None, int, int]:
     return ls, le, int(is_), int(ie)
 
 
-def _merge_overlaps(ranges: List[Tuple[int | None, int | None, int, int]]
-                    ) -> List[Tuple[int | None, int | None, int, int]]:
+def _merge_overlaps(
+    ranges: List[Tuple[int | None, int | None, int, int]],
+) -> List[Tuple[int | None, int | None, int, int]]:
     if not ranges:
         return []
     merged: List[Tuple[int | None, int | None, int, int]] = []
@@ -87,8 +73,12 @@ def _merge_overlaps(ranges: List[Tuple[int | None, int | None, int, int]]
         ls, le, ps, pe = merged[-1]
         cur_ls, cur_le, cur_ps, cur_pe = r
         if cur_ps <= pe:
-            new_ls = ls if (ls is not None and (cur_ls is None or ls <= cur_ls)) else cur_ls
-            new_le = le if (le is not None and (cur_le is None or le >= cur_le)) else cur_le
+            new_ls = (
+                ls if (ls is not None and (cur_ls is None or ls <= cur_ls)) else cur_ls
+            )
+            new_le = (
+                le if (le is not None and (cur_le is None or le >= cur_le)) else cur_le
+            )
             merged[-1] = (new_ls, new_le, min(ps, cur_ps), max(pe, cur_pe))
         else:
             merged.append(r)
